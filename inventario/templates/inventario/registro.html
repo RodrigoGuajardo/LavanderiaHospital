@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <title>Document</title>
+</head>
+<body>
+    
+
+    <form method="POST">
+        {% csrf_token %}
+        <label for="service">Servicio Clínico:</label>
+        <select name="service" id="service">
+            <option value="">--- Seleccionar ---</option>
+            {% for service in services %}
+                <option value="{{ service.id }}">{{ service.nombre }}</option>
+            {% endfor %}
+        </select>
+    
+        <label for="laundry">Lavandería Externa:</label>
+        <select name="laundry" id="laundry">
+            <option value="">--- Seleccionar ---</option>
+            {% for laundry in laundries %}
+                <option value="{{ laundry.id }}">{{ laundry.nombre }}</option>
+            {% endfor %}
+        </select>
+    
+        <label for="clothing_type">Tipo de Ropa:</label>
+        <select name="clothing_type" id="clothing_type">
+            {% for clothing_type in clothing_types %}
+                <option value="{{ clothing_type.id }}">{{ clothing_type.nombre }}</option>
+            {% endfor %}
+        </select>
+    
+        <label for="transaction_type">Tipo de Transacción:</label>
+        <select name="transaction_type" id="transaction_type">
+            <option value="ingreso">Ingreso</option>
+            <option value="egreso">Egreso</option>
+        </select>
+    
+        <label for="clothing_status">Estado de la Ropa:</label>
+        <select name="clothing_status" id="clothing_status">
+            <option value="limpia">Limpia</option>
+            <option value="sucia">Sucia</option>
+        </select>
+    
+        <label for="cantidad">Cantidad:</label>
+        <input type="number" name="cantidad" id="cantidad" required>
+    
+        <button type="submit">Registrar</button>
+    </form>
+    
+
+
+
+</body>
+</html>
