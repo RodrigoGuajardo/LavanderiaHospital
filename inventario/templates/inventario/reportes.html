@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generar Reportes</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <header>
+        <h1>Reportes de Inventario</h1>
+    </header>
+
+    <main>
+        <h2>Listado de Movimientos</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Servicio/Lavandería</th>
+                    <th>Lavandería</th>
+                    <th>Tipo de Ropa</th>
+                    <th>Transacción</th>
+                    <th>Estado</th>
+                    <th>Cantidad</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for reporte in reportajes %}
+                <tr>
+                    <td>{{ reporte.fecha_transaccion }}</td>
+                    <td>{{ reporte.service.nombre|default_if_none:reporte.laundry.nombre }}</td>
+                    <td>{{ reporte.laundry.nombre }}</td>
+                    <td>{{ reporte.clothing_type.nombre }}</td>
+                    <td>{{ reporte.transaction_type }}</td>
+                    <td>{{ reporte.clothing_status }}</td>
+                    <td>{{ reporte.cantidad }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </main>
+</body>
+</html>
