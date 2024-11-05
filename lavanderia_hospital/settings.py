@@ -123,7 +123,7 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-LOGIN_REDIRECT_URL = 'home'  # Ajusta 'home' a la URL que prefieras
+LOGIN_REDIRECT_URL = ''  # Ajusta 'home' a la URL que prefieras
 
 LOGOUT_REDIRECT_URL = 'login'
 

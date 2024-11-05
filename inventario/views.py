@@ -89,7 +89,7 @@ def login_view(request):
             if user is not None:
                 login(request, user)
                 messages.success(request, "Inicio de sesión exitoso.")
-                #return redirect('')  # Redirige a la página principal o a donde desees
+                return redirect('inventario:home')  # Redirige a la página principal o a donde desees
             else:
                 messages.error(request, "Usuario o contraseña incorrectos.")
     else:
