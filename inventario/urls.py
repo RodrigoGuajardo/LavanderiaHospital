@@ -10,7 +10,11 @@ app_name = 'inventario'
 urlpatterns = [
     path('home/', views.home, name='home'),
     path('',home, name="home"), 
-    path('login',login_view, name="login"),
+    path('irLogin',views.irLogin,name="irLogin"),
+    path('registro/', views.register_view, name='registro'),
+    path('login/', views.login_view, name='login'),
+    path('logout/', views.logout_view, name='logout'),
+
     path('ingresoegreso', views.registrar_transaccion, name="ingresoegreso"),
     path('registro',registro, name="registro"),
     path('reportes',generar_reportes,name="reportes")

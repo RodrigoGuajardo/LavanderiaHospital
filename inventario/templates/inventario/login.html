@@ -13,23 +13,14 @@
     </header>
 
     <main>
-        <form method="POST">
+        <form method="post">
             {% csrf_token %}
-            <label for="username">Usuario:</label>
-            <input type="text" name="username" id="username" required>
-
-            <label for="password">Contraseña:</label>
-            <input type="password" name="password" id="password" required>
-
-            {% if error %}
-                <p>{{ error }}</p>
-            {% endif %}
-
+            {{ form.as_p }}
             <button type="submit">Iniciar Sesión</button>
-
-            <button type="warning">No tienes Cuenta?</button>
-
         </form>
+
+        <p>No tienes Cuenta? Haz click <a href="{% url 'inventario:registro' %}">Aqui</a>!!!</p>
+        <a href="{% url 'inventario:home' %}">Home</a>
     </main>
 </body>
 </html>

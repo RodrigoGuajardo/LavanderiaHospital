@@ -1,3 +1,5 @@
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from .models import *
 from django.contrib.auth import login, logout, authenticate
 from django.shortcuts import render, redirect
@@ -6,9 +8,12 @@ from django.contrib import messages
 
 def home(request):
     return render(request, 'inventario/index.html')
-def login(request):
+def irLogin(request):
     return render(request,'inventario/login.html')
-
+def logout_view(request):
+    logout(request)
+    messages.success(request, "Has cerrado sesión.")
+    return redirect('inventario:login')
 
 def registrar_transaccion(request):
     if request.method == 'POST':
@@ -40,8 +45,6 @@ def registrar_transaccion(request):
     return render(request, 'inventario/ingresoegreso.html', context)
 
 
-
-
 def generar_reportes(request):
     reportajes = ClothingInventory.objects.all()
 
@@ -52,26 +55,43 @@ def generar_reportes(request):
 
 def registro(request):
     if request.method == 'POST':
-        form = RegistroForm(request.POST)
+        form = UserRegistrationForm(request.POST)
         if form.is_valid():
             user = form.save()
             login(request, user)
             return redirect('home')
     else:
-        form = RegistroForm()
+        form = UserRegistrationForm()
     
     return render(request, 'inventario/registro.html', {'form': form})
 
+def register_view(request):
+    if request.method == 'POST':
+        form = UserRegistrationForm(request.POST)
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.set_password(form.cleaned_data['password'])
+            user.save()
+            messages.success(request, "Registro exitoso. Ahora puedes iniciar sesión.")
+            return redirect('login')
+    else:
+        form = UserRegistrationForm()
+    return render(request, 'inventario/register.html', {'form': form})
 
+# Vista de Login
 def login_view(request):
     if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        user = authenticate(request, username=username, password=password)
-        if user is not None:
-            login(request, user)
-            return redirect('home')
-        else:
-            return render(request, 'login.html', {'error': 'Credenciales incorrectas.'})
-
-    return render(request, 'inventario/login.html')
+        form = LoginForm(data=request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            user = authenticate(request, username=username, password=password)
+            if user is not None:
+                login(request, user)
+                messages.success(request, "Inicio de sesión exitoso.")
+                #return redirect('')  # Redirige a la página principal o a donde desees
+            else:
+                messages.error(request, "Usuario o contraseña incorrectos.")
+    else:
+        form = LoginForm()
+    return render(request, 'inventario/login.html', {'form': form})

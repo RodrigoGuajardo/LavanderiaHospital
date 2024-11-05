@@ -123,8 +123,10 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-LOGIN_REDIRECT_URL = ""
+LOGIN_REDIRECT_URL = 'home'  # Ajusta 'home' a la URL que prefieras
 
-LOGOUT_REDIRECT_URL = "home"
+LOGOUT_REDIRECT_URL = 'login'
 
 CRISPY_TEMPLATE_PACK = "bootstrap4"
+
+APPEND_SLASH = False

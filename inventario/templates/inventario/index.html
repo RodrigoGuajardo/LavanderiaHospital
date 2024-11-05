@@ -13,10 +13,17 @@
     <div class="container">
 
         <header>
-            <a href="{% url 'inventario:home' %}"><h1>Lavandería Hospitalaria</h1></a>
+            <h1>Lavandería Hospitalaria</h1>
             <nav>
                 <ul>
-                    <li><a href="{% url 'inventario:login' %}">Iniciar Sesión</a></li>
+                    <li>               
+                    {% if user.is_authenticated %}
+                        <p>Bienvenido, {{ user.username }}!</p>
+                        <a href="{% url 'inventario:logout' %}">Cerrar sesión</a>
+                    {% else %}
+                        <a href="{% url 'inventario:login' %}">Iniciar sesión</a>
+                    {% endif %}</li>
+                    <li><a href="{% url 'inventario:home' %}">Home</a></li>
                     <li><a href="{% url 'inventario:ingresoegreso' %}">Ingresar o Egresar Ropa</a></li>
                     <li><a href="{% url 'inventario:reportes' %}">Generar Reportes</a></li>
                 </ul>
