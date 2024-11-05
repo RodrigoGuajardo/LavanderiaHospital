@@ -19,13 +19,12 @@
                     <li>               
                     {% if user.is_authenticated %}
                         <p>Bienvenido, {{ user.username }}!</p>
-                        <a href="{% url 'inventario:logout' %}">Cerrar sesión</a>
+                        <li><a href="{% url 'inventario:logout' %}">Cerrar sesión</a></li>
+                        <li><a href="{% url 'inventario:ingresoegreso' %}">Ingresar o Egresar Ropa</a></li>
+                        <li><a href="{% url 'inventario:reportes' %}">Generar Reportes</a></li>
                     {% else %}
                         <a href="{% url 'inventario:login' %}">Iniciar sesión</a>
                     {% endif %}</li>
-                    <li><a href="{% url 'inventario:home' %}">Home</a></li>
-                    <li><a href="{% url 'inventario:ingresoegreso' %}">Ingresar o Egresar Ropa</a></li>
-                    <li><a href="{% url 'inventario:reportes' %}">Generar Reportes</a></li>
                 </ul>
     
             </nav>
