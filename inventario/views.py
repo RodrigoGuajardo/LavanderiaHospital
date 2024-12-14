@@ -5,6 +5,31 @@ from django.contrib.auth import login, logout, authenticate
 from django.shortcuts import render, redirect
 from .forms import *
 from django.contrib import messages
+from django.db.models import F
+
+
+
+def generar_reportes(request):
+    # Recuperar filtros del formulario
+    tipo_ropa = request.GET.get('tipo_ropa', '')
+    tipo_transaccion = request.GET.get('tipo_transaccion', '')
+    servicio_clinico = request.GET.get('servicio_clinico', '')
+    fecha_inicio = request.GET.get('fecha_inicio', '')
+    fecha_fin = request.GET.get('fecha_fin', '')
+
+    # Filtrar transacciones
+    resultados = ClothingInventory.objects.all()
+
+    if tipo_ropa:
+        resultados = resultados.filter(clothing_type__nombre__icontains=tipo_ropa)
+    if tipo_transaccion:
+        resultados = resultados.filter(transaction_type=tipo_transaccion)
+    if servicio_clinico:
+        resultados = resultados.filter(service__nombre__icontains=servicio_clinico)
+    if fecha_inicio and fecha_fin:
+        resultados = resultados.filter(fecha_transaccion__range=[fecha_inicio, fecha_fin])
+
+    return render(request, 'reportes.html', {'resultados': resultados})
 
 def home(request):
     return render(request, 'inventario/index.html')
@@ -15,34 +40,53 @@ def logout_view(request):
     messages.success(request, "Has cerrado sesión.")
     return redirect('inventario:login')
 
+
+
 def registrar_transaccion(request):
     if request.method == 'POST':
-        service_id = request.POST.get('service')
-        laundry_id = request.POST.get('laundry')
-        clothing_type_id = request.POST.get('clothing_type')
         transaction_type = request.POST.get('transaction_type')
-        clothing_status = request.POST.get('clothing_status')
-        cantidad = request.POST.get('cantidad')
-        inventory = ClothingInventory(
-            service_id=service_id,
-            laundry_id=laundry_id,
-            clothing_type_id=clothing_type_id,
-            transaction_type=transaction_type,
-            clothing_status=clothing_status,
-            cantidad=cantidad
-        )
-        inventory.save()
-        messages.success(request, 'Registro de inventario exitoso.')
-        return render(request, 'inventario/ingresoegreso.html')
-    services = ClinicalService.objects.all()
-    laundries = ExternalLaundry.objects.all()
-    clothing_types = ClothingType.objects.all()
+        clothing_type_id = request.POST.get('clothing_type')
+        service_id = request.POST.get('service')
+        cantidad = int(request.POST.get('cantidad'))
+        
+        if transaction_type == "ingreso_limpia":
+            # Ropa limpia
+            inventory, created = ClothingInventory.objects.get_or_create(
+                service_id=service_id,
+                clothing_type_id=clothing_type_id,
+                defaults={'cantidad_disponible': 0}
+            )
+            inventory.cantidad_disponible += cantidad
+            inventory.save()
+            messages.success(request, "Ingreso de ropa limpia registrado.")
+        elif transaction_type == "ingreso_sucia":
+            # Ropa sucia
+            laundry_id = request.POST.get('laundry')
+            DirtyClothing.objects.create(
+                service_id=service_id,
+                clothing_type_id=clothing_type_id,
+                cantidad=cantidad,
+                laundry_id=laundry_id,
+                en_proceso=False
+            )
+            messages.success(request, "Ingreso de ropa sucia registrado.")
+        else:
+            messages.error(request, "Transacción no válida.")
+        return redirect('inventario:ingresoegreso')
+
     context = {
-        'services': services,
-        'laundries': laundries,
-        'clothing_types': clothing_types
+        'services': ClinicalService.objects.all(),
+        'laundries': ExternalLaundry.objects.all(),
+        'clothing_types': ClothingType.objects.all()
     }
     return render(request, 'inventario/ingresoegreso.html', context)
+
+def get_context():
+    return {
+        'services': ClinicalService.objects.all(),
+        'laundries': ExternalLaundry.objects.all(),
+        'clothing_types': ClothingType.objects.all()
+    }
 
 
 def generar_reportes(request):

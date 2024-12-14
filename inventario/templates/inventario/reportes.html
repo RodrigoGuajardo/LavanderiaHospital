@@ -4,30 +4,65 @@
     {% load static %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generar Reportes</title>
+    <title>Búsqueda Avanzada</title>
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body>
     <header>
         <h1>Reportes de Inventario</h1>
-
         <nav>
             <ul>
                 <li><a href="{% url 'inventario:home' %}">Home</a></li>
                 <li><a href="{% url 'inventario:ingresoegreso' %}">Ingresar o Egresar Ropa</a></li>
+                <li><a href="{% url 'inventario:reportes' %}">Búsqueda Avanzada</a></li>
             </ul>
-
         </nav>
     </header>
 
     <main>
-        <h2>Listado de Movimientos</h2>
+        <h2>Búsqueda Avanzada</h2>
+
+        <!-- Formulario de búsqueda -->
+        <form method="GET" action="{% url 'inventario:reportes' %}">
+            <div>
+                <label for="tipo_ropa">Tipo de Ropa:</label>
+                <input type="text" name="tipo_ropa" id="tipo_ropa" placeholder="Ej. Sábanas" value="{{ request.GET.tipo_ropa }}">
+            </div>
+
+            <div>
+                <label for="tipo_transaccion">Tipo de Transacción:</label>
+                <select name="tipo_transaccion" id="tipo_transaccion">
+                    <option value="" selected>Todos</option>
+                    <option value="ingreso" {% if request.GET.tipo_transaccion == "ingreso" %}selected{% endif %}>Ingreso</option>
+                    <option value="egreso" {% if request.GET.tipo_transaccion == "egreso" %}selected{% endif %}>Egreso</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="servicio_clinico">Servicio Clínico:</label>
+                <input type="text" name="servicio_clinico" id="servicio_clinico" placeholder="Ej. Pediatría" value="{{ request.GET.servicio_clinico }}">
+            </div>
+
+            <div>
+                <label for="fecha_inicio">Fecha Inicio:</label>
+                <input type="date" name="fecha_inicio" id="fecha_inicio" value="{{ request.GET.fecha_inicio }}">
+            </div>
+
+            <div>
+                <label for="fecha_fin">Fecha Fin:</label>
+                <input type="date" name="fecha_fin" id="fecha_fin" value="{{ request.GET.fecha_fin }}">
+            </div>
+
+            <button type="submit">Buscar</button>
+        </form>
+
+        <!-- Resultados -->
+        <h2>Resultados</h2>
         <table>
             <thead>
                 <tr>
                     <th>Fecha</th>
                     <th>Servicio/Lavandería</th>
-                    <th>Lavandería</th>
                     <th>Tipo de Ropa</th>
                     <th>Transacción</th>
                     <th>Estado</th>
@@ -35,21 +70,24 @@
                 </tr>
             </thead>
             <tbody>
-                {% for reporte in reportajes %}
-                <tr>
-                    <td>{{ reporte.fecha_transaccion }}</td>
-                    <td>{{ reporte.service.nombre|default_if_none:reporte.laundry.nombre }}</td>
-                    <td>{{ reporte.laundry.nombre }}</td>
-                    <td>{{ reporte.clothing_type.nombre }}</td>
-                    <td>{{ reporte.transaction_type }}</td>
-                    <td>{{ reporte.clothing_status }}</td>
-                    <td>{{ reporte.cantidad }}</td>
-                </tr>
-                {% endfor %}
+                {% if resultados %}
+                    {% for reporte in resultados %}
+                    <tr>
+                        <td>{{ reporte.fecha_transaccion }}</td>
+                        <td>{{ reporte.service.nombre|default_if_none:reporte.laundry.nombre }}</td>
+                        <td>{{ reporte.clothing_type.nombre }}</td>
+                        <td>{{ reporte.transaction_type }}</td>
+                        <td>{{ reporte.clothing_status }}</td>
+                        <td>{{ reporte.cantidad }}</td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="6">No se encontraron resultados.</td>
+                    </tr>
+                {% endif %}
             </tbody>
         </table>
     </main>
-
-
 </body>
 </html>

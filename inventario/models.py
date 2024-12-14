@@ -10,6 +10,8 @@ class ClinicalService(models.Model):
 
     def __str__(self):
         return self.nombre
+
+
 class ExternalLaundry(models.Model):
     nombre = models.CharField(max_length=255)
     contacto = models.CharField(max_length=255)
@@ -19,31 +21,38 @@ class ExternalLaundry(models.Model):
 
     def __str__(self):
         return self.nombre
+
+
 class ClothingType(models.Model):
     nombre = models.CharField(max_length=255)
 
     def __str__(self):
         return self.nombre
-class ClothingInventory(models.Model):
-    TRANSACTION_TYPE_CHOICES = [
-        ('ingreso', 'Ingreso'),
-        ('egreso', 'Egreso'),
-    ]
-    CLOTHING_STATUS_CHOICES = [
-        ('limpia', 'Limpia'),
-        ('sucia', 'Sucia'),
-    ]
 
-    service = models.ForeignKey(ClinicalService, on_delete=models.CASCADE, null=True, blank=True)
-    laundry = models.ForeignKey(ExternalLaundry, on_delete=models.CASCADE, null=True, blank=True)
+
+# Modelo para el stock actual de ropa limpia
+class ClothingInventory(models.Model):
+    service = models.ForeignKey(ClinicalService, on_delete=models.CASCADE)
     clothing_type = models.ForeignKey(ClothingType, on_delete=models.CASCADE)
-    transaction_type = models.CharField(max_length=7, choices=TRANSACTION_TYPE_CHOICES)
-    clothing_status = models.CharField(max_length=6, choices=CLOTHING_STATUS_CHOICES)
-    cantidad = models.IntegerField()
-    fecha_transaccion = models.DateTimeField(auto_now_add=True)
+    cantidad_disponible = models.IntegerField(default=0)
 
     def __str__(self):
-        return f"{self.cantidad} - {self.clothing_type.nombre} ({self.transaction_type})"
+        return f"{self.cantidad_disponible} - {self.clothing_type.nombre} en {self.service.nombre}"
+
+
+# Modelo para el manejo de ropa sucia
+class DirtyClothing(models.Model):
+    service = models.ForeignKey(ClinicalService, on_delete=models.CASCADE)
+    clothing_type = models.ForeignKey(ClothingType, on_delete=models.CASCADE)
+    cantidad = models.IntegerField()
+    laundry = models.ForeignKey(ExternalLaundry, on_delete=models.CASCADE, null=True, blank=True)
+    fecha_ingreso = models.DateTimeField(auto_now_add=True)
+    en_proceso = models.BooleanField(default=False)
+
+    def __str__(self):
+        estado = "En proceso" if self.en_proceso else "Pendiente"
+        return f"{self.cantidad} - {self.clothing_type.nombre} ({estado}) en {self.service.nombre}"
+
 
 
 class UserRegistrationForm(forms.ModelForm):
