@@ -5,35 +5,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro de Ingreso y Egreso de Ropa</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <style>
-        .form-group {
-            margin-bottom: 15px;
-        }
-        .hidden {
-            display: none;
-        }
-    </style>
 </head>
 <body>
-    <header class="mb-4">
-        <h1 class="text-center">Registro de Ingreso y Egreso de Ropa</h1>
-        <nav class="text-center">
-            <ul class="list-inline">
-                <li class="list-inline-item"><a href="{% url 'inventario:home' %}">Home</a></li>
-                <li class="list-inline-item"><a href="{% url 'inventario:reportes' %}">Generar Reportes</a></li>
-            </ul>
-        </nav>
+    <header>
+        <h1>Registro de Ingreso y Egreso de Ropa</h1>
     </header>
 
-    <main class="container">
-        <form method="POST" class="border p-4 bg-light">
+    <main>
+        <form method="POST">
             {% csrf_token %}
-            <div class="form-group">
+            <div>
                 <label for="service">Servicio Clínico:</label>
-                <select name="service" id="service" class="form-control" required>
+                <select name="service" id="service" required>
                     <option value="">--- Seleccionar ---</option>
                     {% for service in services %}
                         <option value="{{ service.id }}">{{ service.nombre }}</option>
@@ -41,59 +25,33 @@
                 </select>
             </div>
 
-            <div class="form-group">
-                <label for="clothing_type">Tipo de Ropa:</label>
-                <select name="clothing_type" id="clothing_type" class="form-control" required>
+            <div>
+                <label for="clothing">Tipo de Ropa:</label>
+                <select name="clothing" id="clothing" required>
                     <option value="">--- Seleccionar ---</option>
-                    {% for clothing_type in clothing_types %}
-                        <option value="{{ clothing_type.id }}">{{ clothing_type.nombre }}</option>
+                    {% for clothing in clothing_items %}
+                        <option value="{{ clothing.id }}">{{ clothing.nombre }}</option>
                     {% endfor %}
                 </select>
             </div>
 
-            <div class="form-group">
+            <div>
                 <label for="transaction_type">Tipo de Transacción:</label>
-                <select name="transaction_type" id="transaction_type" class="form-control" required onchange="toggleFields()">
+                <select name="transaction_type" id="transaction_type" required>
                     <option value="">--- Seleccionar ---</option>
                     <option value="ingreso_limpia">Ingreso de Ropa Limpia</option>
-                    <option value="ingreso_sucia">Ingreso de Ropa Sucia</option>
+                    <option value="egreso">Egreso de Ropa</option>
                 </select>
             </div>
 
-            <div class="form-group">
+            <div>
                 <label for="cantidad">Cantidad:</label>
-                <input type="number" name="cantidad" id="cantidad" class="form-control" min="1" required>
+                <input type="number" name="cantidad" id="cantidad" min="1" required>
             </div>
 
-            <!-- Campos para ropa sucia -->
-            <div id="laundry-fields" class="hidden">
-                <div class="form-group">
-                    <label for="laundry">Lavandería Externa:</label>
-                    <select name="laundry" id="laundry" class="form-control">
-                        <option value="">--- Seleccionar ---</option>
-                        {% for laundry in laundries %}
-                            <option value="{{ laundry.id }}">{{ laundry.nombre }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-            </div>
-
-            <button type="submit" class="btn btn-primary w-100">Registrar</button>
+            <button type="submit">Registrar</button>
         </form>
+        <a href="{% url 'inventario:home' %}">Volver a Inicio</a>
     </main>
-
-    <script>
-        function toggleFields() {
-            const transactionType = document.getElementById('transaction_type').value;
-            const laundryFields = document.getElementById('laundry-fields');
-            
-            // Mostrar campos de lavandería si es ropa sucia
-            if (transactionType === "ingreso_sucia") {
-                laundryFields.classList.remove('hidden');
-            } else {
-                laundryFields.classList.add('hidden');
-            }
-        }
-    </script>
 </body>
 </html>

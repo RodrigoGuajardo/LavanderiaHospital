@@ -1,0 +1,44 @@
+<!-- inventario/templates/inventario/asignar_ropa.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asignar Ropa</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <header>
+        <h1>Asignar Ropa</h1>
+    </header>
+
+    <main>
+        <form method="POST">
+            {% csrf_token %}
+            <div>
+                <label for="transaction_type">Tipo de Transacción:</label>
+                {{ form.transaction_type }}
+            </div>
+
+            <div>
+                <label for="service">Servicio Clínico:</label>
+                {{ form.servicio }}
+            </div>
+
+            <div>
+                <label for="clothing">Tipo de Ropa:</label>
+                {{ form.tipo_ropa }}
+            </div>
+
+            <div>
+                <label for="cantidad">Cantidad:</label>
+                {{ form.cantidad }}
+            </div>
+
+            <button type="submit">Registrar</button>
+        </form>
+        <a href="{% url 'inventario:home' %}">Volver a Inicio</a>
+    </main>
+</body>
+</html>

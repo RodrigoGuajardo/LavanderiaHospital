@@ -1,0 +1,44 @@
+<!-- inventario/templates/inventario/gestionar_ropa_sucia.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestionar Ropa Sucia</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <header>
+        <h1>Gestionar Ropa Sucia</h1>
+    </header>
+
+    <main>
+        <form method="POST">
+            {% csrf_token %}
+            <div>
+                <label for="transaction_type">Tipo de Transacción:</label>
+                {{ form.transaction_type }}
+            </div>
+
+            <div>
+                <label for="nombre">Ropa Sucia:</label>
+                {{ form.nombre }}
+            </div>
+
+            <div>
+                <label for="lavanderia">Lavandería:</label>
+                {{ form.lavanderia }}
+            </div>
+
+            <div>
+                <label for="cantidad">Cantidad:</label>
+                <input type="number" name="cantidad" id="cantidad" min="1" required>
+            </div>
+
+            <button type="submit">Registrar</button>
+        </form>
+        <a href="{% url 'inventario:home' %}">Volver a Inicio</a>
+    </main>
+</body>
+</html>

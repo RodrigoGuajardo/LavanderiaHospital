@@ -22,6 +22,53 @@ class ExternalLaundry(models.Model):
     def __str__(self):
         return self.nombre
 
+class Clothing(models.Model):
+    id = models.AutoField(primary_key=True)
+    nombre = models.CharField(max_length=255)
+    cantidad = models.IntegerField()
+    def __str__(self):
+        return self.nombre  # Esto devolverá el nombre de la ropa
+
+    
+class ClothingDirt(models.Model):
+    nombre = models.CharField(max_length=255)
+    cantidad = models.IntegerField()
+    tipo_ropa = models.ForeignKey(Clothing, on_delete=models.CASCADE)  # Relación con Clothing
+
+    def __str__(self):
+        return self.nombre
+
+class ClothingCleaning(models.Model):
+    id = models.AutoField(primary_key=True)
+    nombre = models.CharField(max_length=255)
+    cantidad = models.IntegerField()
+    lavanderia = models.CharField(max_length=255)
+    def __str__(self):
+        return self.nombre
+    
+class ClothingCleanings(models.Model):
+    id = models.AutoField(primary_key=True)
+    tipo_ropa = models.ForeignKey(Clothing, on_delete=models.CASCADE)
+    cantidad = models.IntegerField(default=0)
+    lavanderia = models.ForeignKey(ExternalLaundry, on_delete=models.CASCADE)
+    def __str__(self):
+        return f"{self.tipo_ropa.nombre} en {self.lavanderia.nombre}"
+
+
+
+class ClothingService(models.Model):
+    id = models.AutoField(primary_key=True)
+    nombre = models.CharField(max_length=255)
+    cantidad = models.IntegerField()
+    servicio = models.CharField(max_length=255)
+    
+class ClothingServices(models.Model):
+    tipo_ropa = models.ForeignKey(Clothing, on_delete=models.CASCADE)
+    servicio = models.ForeignKey(ClinicalService, on_delete=models.CASCADE)  # Asegúrate de que esto sea un ForeignKey
+    cantidad = models.IntegerField(default=0)
+
+    def __str__(self):
+        return f"{self.tipo_ropa.nombre} - {self.servicio.nombre}"
 
 class ClothingType(models.Model):
     nombre = models.CharField(max_length=255)

@@ -19,8 +19,11 @@
                 {% if user.is_authenticated %}
                     <p>Bienvenido, {{ user.username }}!</p>
                     <li><a href="{% url 'inventario:logout' %}">Cerrar sesión</a></li>
-                    <li><a href="{% url 'inventario:ingresoegreso' %}">Ingresar o Egresar Ropa</a></li>
+                    <li><a href="{% url 'inventario:ingresoegreso' %}">Ingresos y Egresos</a></li>
+                    <li><a href="{% url 'inventario:asignar_ropa' %}">Asignacion de Ropa</a></li>
+                    <li><a href="{% url 'inventario:gestion-ropa-sucia' %}">Gestion Ropa Sucia</a></li>
                     <li><a href="{% url 'inventario:reportes' %}">Generar Reportes</a></li>
+                    <li><a href="{% url 'inventario:ingresar_ropa' %}">Ingresar Ropa a DB</a></li>
                 {% else %}
                     <a href="{% url 'inventario:login' %}">Iniciar sesión</a>
                 {% endif %}</li>
