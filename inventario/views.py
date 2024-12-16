@@ -6,7 +6,42 @@ from django.shortcuts import render, redirect
 from .forms import *
 from django.contrib import messages
 from django.db.models import F
+from django.db.models import Sum
 
+def generar_reportes(request):
+    # Obtener la cantidad de ropa limpia
+    total_ropa_limpia = Clothing.objects.aggregate(total=Sum('cantidad'))['total'] or 0
+
+    # Obtener la cantidad de ropa sucia
+    total_ropa_sucia = ClothingDirt.objects.aggregate(total=Sum('cantidad'))['total'] or 0
+
+    # Obtener la cantidad de ropa en proceso de lavado
+    total_ropa_en_lavado = ClothingCleanings.objects.aggregate(total=Sum('cantidad'))['total'] or 0
+
+    # Obtener la cantidad de ropa asignada a diferentes áreas
+    total_ropa_asignada = ClothingServices.objects.aggregate(total=Sum('cantidad'))['total'] or 0
+
+    # Crear un diccionario con los datos del reporte
+    reporte = {
+        'total_ropa_limpia': total_ropa_limpia,
+        'total_ropa_sucia': total_ropa_sucia,
+        'total_ropa_en_lavado': total_ropa_en_lavado,
+        'total_ropa_asignada': total_ropa_asignada,
+    }
+
+    # Obtener datos adicionales para las tablas
+    all_clothing = Clothing.objects.all()  # Obtener todos los tipos de ropa
+    all_cleanings = ClothingCleanings.objects.all()  # Obtener todos los registros de limpieza
+    all_dirt = ClothingDirt.objects.all()  # Obtener todos los registros de ropa sucia
+    all_services = ClothingServices.objects.all()  # Obtener todos los registros de ropa asignada
+
+    return render(request, 'inventario/reportes.html', {
+        'reporte': reporte,
+        'all_clothing': all_clothing,
+        'all_cleanings': all_cleanings,
+        'all_dirt': all_dirt,
+        'all_services': all_services,
+    })
 
 def ingresar_ropa(request):
     if request.method == 'POST':
@@ -20,28 +55,18 @@ def ingresar_ropa(request):
     
     return render(request, 'inventario/ingresar_ropa.html', {'form': form})
 
+def register_view(request):
+    if request.method == 'POST':
+        form = UserRegistrationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('inventario:login')  # Redirige a la página de login o donde desees
+    else:
+        form = UserRegistrationForm()
+    return render(request, 'inventario/registro.html', {'form': form})
 
-def generar_reportes(request):
-    # Recuperar filtros del formulario
-    tipo_ropa = request.GET.get('tipo_ropa', '')
-    tipo_transaccion = request.GET.get('tipo_transaccion', '')
-    servicio_clinico = request.GET.get('servicio_clinico', '')
-    fecha_inicio = request.GET.get('fecha_inicio', '')
-    fecha_fin = request.GET.get('fecha_fin', '')
 
-    # Filtrar transacciones
-    resultados = ClothingInventory.objects.all()
 
-    if tipo_ropa:
-        resultados = resultados.filter(clothing_type__nombre__icontains=tipo_ropa)
-    if tipo_transaccion:
-        resultados = resultados.filter(transaction_type=tipo_transaccion)
-    if servicio_clinico:
-        resultados = resultados.filter(service__nombre__icontains=servicio_clinico)
-    if fecha_inicio and fecha_fin:
-        resultados = resultados.filter(fecha_transaccion__range=[fecha_inicio, fecha_fin])
-
-    return render(request, 'reportes.html', {'resultados': resultados})
 
 def home(request):
     return render(request, 'inventario/index.html')
@@ -117,7 +142,7 @@ def asignar_ropa(request):
                     tipo_ropa.cantidad -= cantidad  # Restar de Clothing
                     tipo_ropa.save()
 
-                    # Actualizar ClothingService
+                    # Actualizar ClothingServices
                     clothing_services, created = ClothingServices.objects.get_or_create(
                         tipo_ropa=tipo_ropa,
                         servicio=servicio,
@@ -131,15 +156,16 @@ def asignar_ropa(request):
                     messages.error(request, "No hay suficiente ropa en el inventario para realizar el ingreso.")
                     
             elif transaction_type == 'egreso':
-                # Lógica para egreso
                 clothing_services = ClothingServices.objects.filter(tipo_ropa=tipo_ropa, servicio=servicio).first()
                 if clothing_services and clothing_services.cantidad >= cantidad:
-                    clothing_services.cantidad -= cantidad  # Restar de ClothingServices
+                    clothing_services.cantidad -= cantidad  # Aquí clothing_services debe ser un objeto, no un int
                     clothing_services.save()
+
 
                     # Guardar en ClothingDirt
                     clothing_dirt, created = ClothingDirt.objects.get_or_create(
                         nombre=tipo_ropa.nombre,
+                        tipo_ropa=tipo_ropa,  # Asegúrate de establecer el tipo de ropa
                         defaults={'cantidad': 0}
                     )
                     clothing_dirt.cantidad += cantidad  # Sumar a ClothingDirt
@@ -158,6 +184,9 @@ def asignar_ropa(request):
     }
     return render(request, 'inventario/asignar_ropa.html', context)
 
+
+
+
 def gestionar_ropa_sucia(request):
     if request.method == 'POST':
         form = ClothingCleaningForm(request.POST)
@@ -174,13 +203,13 @@ def gestionar_ropa_sucia(request):
                     ropa_sucia.save()
 
                     # Crear o actualizar ClothingCleanings
-                    cleaning, created = ClothingCleanings.objects.get_or_create(
+                    ClothingCleaning, created = ClothingCleanings.objects.get_or_create(
                         tipo_ropa=ropa_sucia.tipo_ropa,  # Asegúrate de que esto sea un objeto Clothing
                         lavanderia=lavanderia,  # Guardar la lavandería seleccionada
                         defaults={'cantidad': 0}
                     )
-                    cleaning.cantidad += cantidad  # Sumar a ClothingCleanings
-                    cleaning.save()
+                    ClothingCleaning.cantidad += cantidad  # Sumar a ClothingCleanings
+                    ClothingCleaning.save()  # Asegúrate de guardar el objeto
 
                     messages.success(request, "Ingreso de ropa sucia registrado exitosamente.")
                 else:
@@ -205,7 +234,7 @@ def gestionar_ropa_sucia(request):
                 else:
                     messages.error(request, "No hay suficiente ropa limpia para realizar el egreso.")
                     
-            return redirect('inventario:gestion-ropa-sucia')  # Redirigir a la misma página o a otra
+            return redirect('inventario:gestionar_ropa_sucia')  # Redirigir a la misma página o a otra
     else:
         form = ClothingCleaningForm()
 
@@ -227,38 +256,7 @@ def get_context():
     }
 
 
-def generar_reportes(request):
-    reportajes = ClothingInventory.objects.all()
 
-    context = {
-        'reportajes': reportajes
-    }
-    return render(request, 'inventario/reportes.html', context)
-
-def registro(request):
-    if request.method == 'POST':
-        form = UserRegistrationForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            login(request, user)
-            return redirect('inventario:home')
-    else:
-        form = UserRegistrationForm()
-    
-    return render(request, 'inventario/registro.html', {'form': form})
-
-def register_view(request):
-    if request.method == 'POST':
-        form = UserRegistrationForm(request.POST)
-        if form.is_valid():
-            user = form.save(commit=False)
-            user.set_password(form.cleaned_data['password'])
-            user.save()
-            messages.success(request, "Registro exitoso. Ahora puedes iniciar sesión.")
-            return redirect('login')
-    else:
-        form = UserRegistrationForm()
-    return render(request, 'inventario/register.html', {'form': form})
 
 # Vista de Login
 def login_view(request):

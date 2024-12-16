@@ -4,7 +4,7 @@
     {% load static %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Búsqueda Avanzada</title>
+    <title>Reportes de Inventario</title>
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body>
@@ -13,81 +13,101 @@
         <nav>
             <ul>
                 <li><a href="{% url 'inventario:home' %}">Home</a></li>
-                <li><a href="{% url 'inventario:ingresoegreso' %}">Ingresar o Egresar Ropa</a></li>
-                <li><a href="{% url 'inventario:reportes' %}">Búsqueda Avanzada</a></li>
             </ul>
         </nav>
     </header>
 
     <main>
-        <h2>Búsqueda Avanzada</h2>
+        <h2>Reporte de Inventario</h2>
 
-        <!-- Formulario de búsqueda -->
-        <form method="GET" action="{% url 'inventario:reportes' %}">
-            <div>
-                <label for="tipo_ropa">Tipo de Ropa:</label>
-                <input type="text" name="tipo_ropa" id="tipo_ropa" placeholder="Ej. Sábanas" value="{{ request.GET.tipo_ropa }}">
-            </div>
+        <div>
+            <h3>Resumen de Ropa</h3>
+            <ul>
+                <li><strong>Total de Ropa Limpia:</strong> {{ reporte.total_ropa_limpia }}</li>
+                <li><strong>Total de Ropa Sucia:</strong> {{ reporte.total_ropa_sucia }}</li>
+                <li><strong>Total de Ropa en Proceso de Lavado:</strong> {{ reporte.total_ropa_en_lavado }}</li>
+                <li><strong>Total de Ropa Asignada a Áreas:</strong> {{ reporte.total_ropa_asignada }}</li>
+            </ul>
+        </div>
 
-            <div>
-                <label for="tipo_transaccion">Tipo de Transacción:</label>
-                <select name="tipo_transaccion" id="tipo_transaccion">
-                    <option value="" selected>Todos</option>
-                    <option value="ingreso" {% if request.GET.tipo_transaccion == "ingreso" %}selected{% endif %}>Ingreso</option>
-                    <option value="egreso" {% if request.GET.tipo_transaccion == "egreso" %}selected{% endif %}>Egreso</option>
-                </select>
-            </div>
+        <h2>Información Detallada</h2>
 
-            <div>
-                <label for="servicio_clinico">Servicio Clínico:</label>
-                <input type="text" name="servicio_clinico" id="servicio_clinico" placeholder="Ej. Pediatría" value="{{ request.GET.servicio_clinico }}">
-            </div>
-
-            <div>
-                <label for="fecha_inicio">Fecha Inicio:</label>
-                <input type="date" name="fecha_inicio" id="fecha_inicio" value="{{ request.GET.fecha_inicio }}">
-            </div>
-
-            <div>
-                <label for="fecha_fin">Fecha Fin:</label>
-                <input type="date" name="fecha_fin" id="fecha_fin" value="{{ request.GET.fecha_fin }}">
-            </div>
-
-            <button type="submit">Buscar</button>
-        </form>
-
-        <!-- Resultados -->
-        <h2>Resultados</h2>
+        <h3>Ropa Limpia</h3>
         <table>
             <thead>
                 <tr>
-                    <th>Fecha</th>
-                    <th>Servicio/Lavandería</th>
-                    <th>Tipo de Ropa</th>
-                    <th>Transacción</th>
-                    <th>Estado</th>
+                    <th>Nombre</th>
                     <th>Cantidad</th>
                 </tr>
             </thead>
             <tbody>
-                {% if resultados %}
-                    {% for reporte in resultados %}
-                    <tr>
-                        <td>{{ reporte.fecha_transaccion }}</td>
-                        <td>{{ reporte.service.nombre|default_if_none:reporte.laundry.nombre }}</td>
-                        <td>{{ reporte.clothing_type.nombre }}</td>
-                        <td>{{ reporte.transaction_type }}</td>
-                        <td>{{ reporte.clothing_status }}</td>
-                        <td>{{ reporte.cantidad }}</td>
-                    </tr>
-                    {% endfor %}
-                {% else %}
-                    <tr>
-                        <td colspan="6">No se encontraron resultados.</td>
-                    </tr>
-                {% endif %}
+                {% for clothing in all_clothing %}
+                <tr>
+                    <td>{{ clothing.nombre }}</td>
+                    <td>{{ clothing.cantidad }}</td>
+                </tr>
+                {% endfor %}
             </tbody>
         </table>
+
+        <h3>Ropa Sucia</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Cantidad</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for dirt in all_dirt %}
+                <tr>
+                    <td>{{ dirt.nombre }}</td>
+                    <td>{{ dirt.cantidad }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <h3>Ropa en Proceso de Lavado</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Tipo de Ropa</th>
+                    <th>Cantidad</th>
+                    <th>Lavandería</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cleaning in all_cleanings %}
+                <tr>
+                    <td>{{ cleaning.tipo_ropa.nombre }}</td>
+                    <td>{{ cleaning.cantidad }}</td>
+                    <td>{{ cleaning.lavanderia.nombre }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <h3>Ropa Asignada a Áreas</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Tipo de Ropa</th>
+                    <th>Servicio Clínico</th>
+                    <th>Cantidad</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for service in all_services %}
+                <tr>
+                    <td>{{ service.tipo_ropa.nombre }}</td>
+                    <td>{{ service.servicio.nombre }}</td>
+                    <td>{{ service.cantidad }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
     </main>
 </body>
 </html>

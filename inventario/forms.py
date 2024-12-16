@@ -18,7 +18,7 @@ class ClothingServiceForm(forms.ModelForm):
     transaction_type = forms.ChoiceField(choices=TRANSACTION_CHOICES, label="Tipo de Transacción")
 
     class Meta:
-        model = ClothingService
+        model = ClothingServices
         fields = ['cantidad', 'servicio', 'tipo_ropa', 'transaction_type']
 
     servicio = forms.ModelChoiceField(queryset=ClinicalService.objects.all(), label="Servicio Clínico")
@@ -31,10 +31,12 @@ class ClothingServiceForm(forms.ModelForm):
         transaction_type = cleaned_data.get("transaction_type")
 
         # Verificar que la cantidad no exceda la cantidad disponible en Clothing para egreso
-        if transaction_type == 'egreso' and tipo_ropa and cantidad > tipo_ropa.cantidad:
-            self.add_error('cantidad', f"La cantidad no puede exceder {tipo_ropa.cantidad}.")
+        if transaction_type == 'egreso' and tipo_ropa is not None:
+            if cantidad > tipo_ropa.cantidad:
+                self.add_error('cantidad', f"La cantidad no puede exceder {tipo_ropa.cantidad}.")
 
         return cleaned_data
+
 
 class ClothingCleaningForm(forms.ModelForm):
     TRANSACTION_CHOICES = [

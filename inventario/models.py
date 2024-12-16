@@ -64,7 +64,7 @@ class ClothingService(models.Model):
     
 class ClothingServices(models.Model):
     tipo_ropa = models.ForeignKey(Clothing, on_delete=models.CASCADE)
-    servicio = models.ForeignKey(ClinicalService, on_delete=models.CASCADE)  # Asegúrate de que esto sea un ForeignKey
+    servicio = models.ForeignKey(ClinicalService, on_delete=models.CASCADE)
     cantidad = models.IntegerField(default=0)
 
     def __str__(self):
